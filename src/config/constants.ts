@@ -55,6 +55,11 @@ export const CURSOR_THROTTLE_MS = 50;
 /** Realtime auth token lifetime. */
 export const REALTIME_TOKEN_TTL_SECONDS = 300;
 
+/** How long a freshly-minted invite link stays valid. 7 days is the standard
+ *  Slack/Notion default — long enough for someone to act on a DM'd link,
+ *  short enough that a leaked link doesn't grant access indefinitely. */
+export const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
 export const CURSOR_COLORS = [
   "#6366f1",
   "#ec4899",

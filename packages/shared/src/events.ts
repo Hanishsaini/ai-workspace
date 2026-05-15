@@ -9,6 +9,7 @@ import type {
   CanvasOpApplied,
   MessageDTO,
   PresenceUser,
+  WorkspaceMemberDTO,
 } from "./domain";
 
 // ─── Client → Server ────────────────────────────────────────────────────
@@ -42,6 +43,7 @@ export interface ServerToClientEvents {
   "ai:run:completed": (p: { runId: string; message: MessageDTO }) => void;
   "ai:run:error": (p: { runId: string; error: string }) => void;
   "canvas:op:applied": (p: CanvasOpApplied) => void;
+  "workspace:member:added": (p: { member: WorkspaceMemberDTO }) => void;
   "system:error": (p: { message: string }) => void;
 }
 

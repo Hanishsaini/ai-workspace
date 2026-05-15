@@ -7,6 +7,7 @@ import { useWorkspaceStore } from "@/stores/workspace-store";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { WorkspaceHeader } from "./workspace-header";
 import { CommandPalette } from "./command-palette";
+import { JoinedToast } from "./joined-toast";
 import { ConversationPanel } from "@/features/conversation/components/conversation-panel";
 import { CanvasBoard } from "@/features/canvas/components/canvas-board";
 
@@ -63,6 +64,7 @@ export function WorkspaceShell({
         </div>
 
         <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
+        <JoinedToast />
       </div>
     </SocketProvider>
   );

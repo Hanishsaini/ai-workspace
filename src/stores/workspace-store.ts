@@ -10,6 +10,7 @@ import type {
   MessageDTO,
   PresenceUser,
   WorkspaceDTO,
+  WorkspaceMemberDTO,
   WorkspaceSnapshot,
 } from "@workspace/shared";
 
@@ -64,6 +65,9 @@ interface WorkspaceState {
   // ── actions: hydration ───────────────────────────────────────────────
   hydrate: (snapshot: WorkspaceSnapshot) => void;
   setConnection: (status: ConnectionStatus) => void;
+
+  // ── actions: membership ──────────────────────────────────────────────
+  addWorkspaceMember: (member: WorkspaceMemberDTO) => void;
 
   // ── actions: presence ────────────────────────────────────────────────
   setPresenceState: (users: PresenceUser[]) => void;
@@ -153,6 +157,20 @@ export const useWorkspaceStore = create<WorkspaceState>((set) => ({
     }),
 
   setConnection: (connection) => set({ connection }),
+
+  addWorkspaceMember: (member) =>
+    set((s) => {
+      if (!s.workspace) return s;
+      // Idempotent — the invite flow guarantees one publish per accept, but
+      // a reconnect-resync could replay it.
+      if (s.workspace.members.some((m) => m.userId === member.userId)) return s;
+      return {
+        workspace: {
+          ...s.workspace,
+          members: [...s.workspace.members, member],
+        },
+      };
+    }),
 
   setPresenceState: (users) =>
     set({ presence: new Map(users.map((u) => [u.userId, u])) }),

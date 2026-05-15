@@ -152,6 +152,16 @@ function wireEvents(s: AppClientSocket, workspaceId: string) {
   // ── canvas ─────────────────────────────────────────────────────────────
   s.on("canvas:op:applied", (applied) => store().applyCanvasOp(applied));
 
+  // ── membership ─────────────────────────────────────────────────────────
+  // Fired by the invite-accept service after a new WorkspaceMember row is
+  // written. Keeps the members list in lockstep with reality for everyone
+  // already in the workspace — presence:update arrives separately when the
+  // new user's socket connects.
+  s.on("workspace:member:added", ({ member }) => {
+    store().addWorkspaceMember(member);
+    toast.success(`${member.user.name ?? "Someone"} joined the workspace`);
+  });
+
   // ── system ─────────────────────────────────────────────────────────────
   s.on("system:error", ({ message }) => toast.error(message));
 }

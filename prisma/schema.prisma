@@ -70,6 +70,8 @@ model User {
   messages        Message[]
   ownedWorkspaces Workspace[]       @relation("WorkspaceOwner")
   presence        PresenceState[]
+  invitesSent     WorkspaceInvite[] @relation("InvitesSent")
+  invitesUsed     WorkspaceInvite[] @relation("InvitesUsed")
 }
 
 /// NextAuth OAuth account links. Standard adapter shape — do not rename
@@ -133,8 +135,32 @@ model Workspace {
   conversations Conversation[]
   canvases      CanvasDocument[]
   presence      PresenceState[]
+  invites       WorkspaceInvite[]
 
   @@index([ownerId])
+}
+
+/// Single-use invite tokens that grant membership on /invite/[token].
+/// `usedAt` + `usedById` populate on the first successful accept; subsequent
+/// visits either redirect the existing member into the workspace or report
+/// the invite as already used.
+model WorkspaceInvite {
+  id          String     @id @default(cuid())
+  token       String     @unique
+  workspaceId String
+  role        MemberRole @default(EDITOR)
+  invitedById String
+  expiresAt   DateTime
+  usedAt      DateTime?
+  usedById    String?
+  createdAt   DateTime   @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  invitedBy User      @relation("InvitesSent", fields: [invitedById], references: [id], onDelete: Cascade)
+  usedBy    User?     @relation("InvitesUsed", fields: [usedById], references: [id])
+
+  @@index([workspaceId])
+  @@index([invitedById])
 }
 
 /// The authorization boundary — every realtime and data op is gated on a

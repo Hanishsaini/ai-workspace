@@ -71,9 +71,27 @@ export function CommandPalette({
 
   async function copyInviteLink() {
     if (!workspace) return;
-    const url = `${window.location.origin}/w/${workspace.id}`;
-    await navigator.clipboard.writeText(url);
-    toast.success("Invite link copied to clipboard");
+    const pending = toast.loading("Generating invite link…");
+    try {
+      const res = await fetch(
+        `/api/workspaces/${workspace.id}/invites`,
+        { method: "POST" },
+      );
+      if (!res.ok) {
+        const data = (await res.json().catch(() => null)) as
+          | { error?: string }
+          | null;
+        throw new Error(data?.error ?? "Could not create invite");
+      }
+      const { invite } = (await res.json()) as { invite: { url: string } };
+      await navigator.clipboard.writeText(invite.url);
+      toast.success("Invite link copied to clipboard", { id: pending });
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Could not create invite",
+        { id: pending },
+      );
+    }
   }
 
   return (
