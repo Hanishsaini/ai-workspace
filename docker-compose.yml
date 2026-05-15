@@ -1,0 +1,30 @@
+# ════════════════════════════════════════════════════════════════════════
+#  OPTIONAL fallback — DO NOT use unless you specifically want local Docker.
+#
+#  The default development path is fully hosted + free:
+#    - Supabase  (Postgres)  — DATABASE_URL / DIRECT_URL
+#    - Upstash   (Redis)     — REDIS_URL
+#
+#  This file remains so anyone with the disk + RAM headroom CAN run the
+#  infra locally, but it is not part of the supported low-resource flow.
+#  Setup instructions never reference it.
+# ════════════════════════════════════════════════════════════════════════
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: aiworkspace
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports: ["6379:6379"]
+    volumes: [redisdata:/data]
+
+volumes:
+  pgdata:
+  redisdata:
