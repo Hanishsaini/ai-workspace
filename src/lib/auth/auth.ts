@@ -40,12 +40,17 @@ function buildProviders(): NextAuthOptions["providers"] {
   const env = getServerEnv();
   const providers: NextAuthOptions["providers"] = [];
 
+  // `allowDangerousEmailAccountLinking` stays FALSE. If a user already signed
+  // in with provider A and then attempts provider B with the same verified
+  // email, NextAuth refuses to silently merge the accounts — the unverified
+  // side could be an attacker registering the same address elsewhere. The
+  // user gets an OAuthAccountNotLinked error (handled by the login form copy)
+  // and is told to use their original provider.
   if (env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET) {
     providers.push(
       GoogleProvider({
         clientId: env.GOOGLE_CLIENT_ID,
         clientSecret: env.GOOGLE_CLIENT_SECRET,
-        allowDangerousEmailAccountLinking: true,
       }),
     );
   }
@@ -54,7 +59,6 @@ function buildProviders(): NextAuthOptions["providers"] {
       GitHubProvider({
         clientId: env.GITHUB_ID,
         clientSecret: env.GITHUB_SECRET,
-        allowDangerousEmailAccountLinking: true,
       }),
     );
   }
