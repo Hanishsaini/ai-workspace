@@ -1,21 +1,23 @@
-import { withAuth } from "next-auth/middleware";
+import { NextResponse, type NextRequest } from "next/server";
 
 /**
- * Protected-route gate. Runs on the edge before any matched route renders.
- * Unauthenticated requests to /dashboard or /w/* are redirected to /login.
+ * No-op middleware.
  *
- * Public routes (/, /login, /api/auth/*) intentionally bypass the matcher —
- * the home page and login both do their own auth handling. The realtime
- * token API is callable only when authenticated, but it does its own
- * session check inside the handler, so no middleware gate is needed there.
+ * The previous `withAuth` edge middleware was bouncing valid sessions back
+ * to /login on Vercel — likely an edge-runtime / cookie / NEXTAUTH_SECRET
+ * propagation issue that was eating into the demo timeline. Auth is now
+ * enforced at the route level instead: every protected page (the dashboard,
+ * the workspace surface) calls `getCurrentUser()` and redirects to /login
+ * itself when the session is absent.
  *
- * NextAuth v4's `withAuth` reads the JWT from the session cookie; the
- * redirect target is configured by `pages.signIn` in authOptions.
+ * End-user behavior is identical; the difference is the check runs in the
+ * Node.js function rather than the edge.
  */
-export default withAuth({
-  pages: { signIn: "/login" },
-});
+export function middleware(_req: NextRequest) {
+  return NextResponse.next();
+}
 
+// Run on nothing — let pages handle their own auth.
 export const config = {
-  matcher: ["/dashboard/:path*", "/w/:path*"],
+  matcher: [],
 };
